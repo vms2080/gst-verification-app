@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSN Code GST Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 60%;
+            padding: 12px 20px;
+            margin-right: 20px;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #F04A00;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #D64200;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f8f8;
+            color: #333;
+            font-weight: bold;
+        }
+        tr:first-child th:first-child {
+            border-top-left-radius: 10px;
+        }
+        tr:first-child th:last-child {
+            border-top-right-radius: 10px;
+        }
+        tr:last-child td:first-child {
+            border-bottom-left-radius: 10px;
+        }
+        tr:last-child td:last-child {
+            border-bottom-right-radius: 10px;
+        }
+        #error {
+            color: #D32F2F;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HSN Code GST Lookup</h1>
+        <div class="search-container">
+            <input type="text" id="hsnInput" placeholder="Enter HSN Code (with or without dots)">
+            <button onclick="lookupHSN()">Lookup</button>
+        </div>
+        <div id="result"></div>
+        <div id="error"></div>
+    </div>
+
+    <script>
+    const hsnDatabase = {
+        "0101": { description: "Horses, asses, mules and hinnies, live", gstRate: "NIL" },
+        "0101.11.00": { description: "Purebred breeding animals", gstRate: "NIL" },
+        "0101.19.00": { description: "Other horses", gstRate: "NIL" },
+        "0101.20.00": { description: "Asses, mules, and hinnies", gstRate: "NIL" },
+        "0101.21.00": { description: "Live Horses", gstRate: "12%" },
+        "0101.29.00": { description: "Live Horses", gstRate: "12%" },
+        "0102.00.00": { description: "Bovine animals, live", gstRate: "NIL" },
+        "0102.10.00": { description: "Purebred breeding animals", gstRate: "NIL" },
+        "0102.11.00": { description: "Cattle", gstRate: "NIL" },
+        "0103.00.00": { description: "Swine, live", gstRate: "NIL" },
+        "0103.10.00": { description: "Purebred breeding animals", gstRate: "NIL" },
+        // ... Add more entries from your file here
+    };
+
+    function normalizeHSNCode(code) {
+        code = code.replace(/\./g, '').padEnd(8, '0');
+        return code.slice(0, 4) + '.' + code.slice(4, 6) + '.' + code.slice(6);
+    }
+
+    function lookupHSN() {
+        let hsnCode = document.getElementById('hsnInput').value.trim();
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+        
+        hsnCode = normalizeHSNCode(hsnCode);
+        
+        let matchedCode = '';
+        for (let i = hsnCode.length; i > 0; i--) {
+            const partialCode = hsnCode.slice(0, i);
+            if (hsnDatabase.hasOwnProperty(partialCode)) {
+                matchedCode = partialCode;
+                break;
+            }
+        }
+
+        if (matchedCode) {
+            const item = hsnDatabase[matchedCode];
+            resultDiv.innerHTML = `
+                <table>
+                    <tr><th>HSN Code</th><td>${matchedCode}</td></tr>
+                    <tr><th>Description</th><td>${item.description}</td></tr>
+                    <tr><th>GST Rate</th><td>${item.gstRate}</td></tr>
+                </table>
+            `;
+            errorDiv.textContent = '';
+        } else {
+            resultDiv.innerHTML = '';
+            errorDiv.textContent = 'HSN code not found in the database.';
+        }
+    }
+    </script>
+</body>
+</html>
